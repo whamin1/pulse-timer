@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="Dark_Gray">#1C1C1C</color>
+    <color name="Deep_Gray">#212121</color>
+    <color name="Cool_Gray_Blue">#37474F</color>
+    <color name="Strong_Green">#2E7D32</color>
+    <color name="bg_paused">#37474F</color>
+    <color name="off_white">#F5F5F5</color>       <!-- 약간 톤 다운된 흰색 -->
+    <color name="light_gray">#CCCCCC</color><!-- 밝은 회색 -->
+    <color name="Ghost_White">#F8F8FF</color>
+    <color name="neon_yellow">#FFFF66</color>     <!-- 눈에 확 띄는 연노랑 -->
+    <color name="electric_blue">#00FFFF</color>   <!-- 밝고 선명한 청록 -->
+    <color name="bg_ready">#1C1C1C</color>     <!-- 준비 상태 -->
+    <color name="bg_running">#212121</color>   <!-- 운동 중 -->
+    <color name="bg_rest">#4E342E</color>      <!-- 휴식 (있다면) -->
+    <color name="bg_finished">#2E7D32</color>  <!-- 운동 완료 -->
+
+</resources>

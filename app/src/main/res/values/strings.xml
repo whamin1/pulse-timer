@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">PULSE Timer</string>
+    <string name="tabata">TABATA</string>
+    <string name="emom">EMOM</string>
+    <string name="amrap">AMRAP</string>
+    <string name="for_time">FOR TIME</string>
+    <string name="btn_tabata">TABATA</string>
+    <string name="btn_emom">EMOM</string>
+    <string name="btn_amrap">AMRAP</string>
+    <string name="btn_for_time">FOR TIME</string>
+    <string name="btn_pulse">PULSE</string>
+    <string name="btn_log">기록 보기</string>
+
+    <!-- 타이머 화면 버튼 -->
+    <string name="btn_start">시작</string>
+    <string name="btn_pause">일시 정지</string>
+    <string name="btn_finish">완료</string>
+    <string name="btn_reset">초기화</string>
+
+        <!-- 상태 텍스트 -->
+    <string name="status_ready">준비 중</string>
+    <string name="status_ready1">준비 중 - 세트 %1$d / %2$d</string>
+    <string name="status_running">운동 중</string>
+    <string name="status_rest">휴식 중</string>
+    <string name="status_paused">일시 정지됨</string>
+    <string name="status_finished">운동 완료</string>
+    <string name="status_work">운동 중 - 세트 %1$d / %2$d</string>
+    <string name="status_work_to_rest">휴식 중 - 세트 %1$d / %2$d</string>
+
+
+    <!-- 기록 화면 -->
+    <string name="text_empty_log">기록이 없습니다.</string>
+    <string name="text_mode">모드</string>
+    <string name="text_time">소요 시간</string>
+    <string name="rounds">라운드: %1d </string>
+
+    <!-- 설정 관련 -->
+    <string name="title_settings">설정</string>
+    <string name="option_notification">알림</string>
+    <string name="option_sound">소리</string>
+
+    <!-- 기타 -->
+    <string name="dialog_confirm">확인</string>
+    <string name="dialog_cancel">취소</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

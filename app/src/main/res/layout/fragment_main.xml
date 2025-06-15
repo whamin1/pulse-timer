@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_view_record"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <Button
+            android:id="@+id/btn_tabata"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TABATA"
+            android:textSize="34sp"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btn_emom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="EMOM"
+            android:textSize="34sp"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btn_amrap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="AMRAP"
+            android:textSize="34sp"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btn_for_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="FOR TIME"
+            android:textSize="34sp"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btn_pulse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PULSE"
+            android:textSize="34sp"
+            app:layout_constraintTop_toBottomOf="@id/btn_for_time" />
+    </LinearLayout>
+
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_view_record"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Log" />
+</androidx.constraintlayout.widget.ConstraintLayout>

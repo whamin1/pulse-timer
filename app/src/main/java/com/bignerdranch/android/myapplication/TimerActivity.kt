@@ -1,5 +1,6 @@
 package com.bignerdranch.android.myapplication
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
@@ -11,6 +12,7 @@ import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
@@ -20,9 +22,12 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
@@ -43,6 +48,8 @@ class TimerActivity : AppCompatActivity() {
     private lateinit var addRoundtText: TextView
     private lateinit var roundCountText: TextView
     private lateinit var roundLogText: TextView
+    private lateinit var roundLogAdapter: RoundLogAdapter
+    private lateinit var roundLogRecycler: RecyclerView
 
     private var countDownTimer: CountDownTimer? = null
     private var isRunning = false
@@ -73,6 +80,7 @@ class TimerActivity : AppCompatActivity() {
 
     enum class TimerState{ WORKING, RESTING, STOPPED }
 
+    @SuppressLint("ResourceType")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_timer)
@@ -100,6 +108,11 @@ class TimerActivity : AppCompatActivity() {
         roundCountText = findViewById(R.id.text_round_count)
         roundLogText = findViewById(R.id.text_round_log)
         val clockView = findViewById<ClockTimerView>(R.id.clockTimerView)
+        roundLogRecycler = findViewById(R.id.recycler_round_log)
+        roundLogAdapter = RoundLogAdapter(emptyList(), timerMode, roundViewModel)
+        roundLogRecycler.adapter = roundLogAdapter
+        roundLogRecycler.layoutManager = LinearLayoutManager(this)
+
 
         val totalDuration = 600_00L
         val intervalDuration = 20_000L
@@ -218,25 +231,14 @@ class TimerActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) { 
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 roundViewModel.rounds.collectLatest { entries ->
-                    roundLogText.text = entries.joinToString("\n") { entry ->
-                        val abs = if (timerMode == TimerMode.FOR_TIME || timerMode == TimerMode.PULSE) {
-                            roundViewModel.formatMillisWithSign(entry.absoluteTime)
-                        }
-                        else roundViewModel.formatMillis(entry.absoluteTime)
-
-                        val interval = if (timerMode == TimerMode.FOR_TIME || timerMode == TimerMode.PULSE) {
-                            roundViewModel.formatMillisWithSign(entry.intervalTime)
-                        } else {
-                            roundViewModel.formatMillis(entry.intervalTime)
-                        }
-                        "라운드 ${entry.roundNumber}  $abs ($interval)"
-
-                    }
+                    roundLogAdapter.updateList(entries)
+                    roundLogRecycler.scrollToPosition(entries.size - 1)
                 }
             }
         }
+
         val modeString = intent.getStringExtra("mode")
         timerMode = TimerMode.valueOf(modeString ?: "TABATA")
 
@@ -348,14 +350,17 @@ class TimerActivity : AppCompatActivity() {
                         val statusText = when (phase) {
                             TabataViewModel.Phase.IDLE -> {
                                 clockView.setProgressSmoothly(0f)
+                                timerText.setTextColor(ContextCompat.getColor(this@TimerActivity, R.color.white))
                                 getString(R.string.status_ready1, currentSet, totalSets)
                             }
                             TabataViewModel.Phase.WORK -> {
                                 clockView.setProgressSmoothly(0f)
+                                timerText.setTextColor(ContextCompat.getColor(this@TimerActivity, R.color.blue))
                                 getString(R.string.status_work, currentSet, totalSets)
                             }
                             TabataViewModel.Phase.REST -> {
                                 clockView.setProgressSmoothly(0f)
+                                timerText.setTextColor(ContextCompat.getColor(this@TimerActivity, Color.GREEN))
                                 getString(R.string.status_work_to_rest, currentSet, totalSets)
                             }
                             TabataViewModel.Phase.DONE -> {
@@ -365,6 +370,7 @@ class TimerActivity : AppCompatActivity() {
                                     finish = false,
                                     reset = true,
                                     addRound = false)
+                                timerText.setTextColor(ContextCompat.getColor(this@TimerActivity, R.color.white))
                                 showResultDialog()
                                 getString(R.string.status_finished)
                             }

@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/clockTimerView" />
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -92,23 +92,16 @@
                     android:textColor="@color/white"
                     android:layout_marginTop="24dp"/>
             </LinearLayout>
-            <ScrollView
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_round_log"
                 android:layout_width="match_parent"
                 android:layout_height="160dp"
-                android:fillViewport="true"
-                android:layout_marginTop="20dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/text_round_log"
-                    android:text="라운드 기록"
-                    android:textColor="@color/white"
-                    android:textSize="24dp" />
-
-            </ScrollView>
+                android:layout_marginTop="20dp"
+                android:background="#222222"
+                android:padding="8dp"
+                android:scrollbars="vertical" />
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
         android:layout_width="wrap_content"

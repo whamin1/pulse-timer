@@ -59,24 +59,25 @@ class TabataViewModel : ViewModel() {
 
         configured = true
         _statusText.value = "준비하세요"
-        workTime = work
-        restTime = rest
-        totalSets = sets
+        workTime = work.coerceAtLeast(1L)
+        restTime = rest.coerceAtLeast(0L)
+        totalSets = sets.coerceAtLeast(1)
         _phase.value = Phase.IDLE
         _remainTime.value = workTime
     }
 
     fun start() {
-        started = true
         isPaused.value = false
 
         if (_phase.value == Phase.IDLE) {
-            startWork()
+            started = true
+            enterPhase(Phase.WORK, workTime)
             return
         }
 
         if (_phase.value == Phase.DONE) return
 
+        started = true
         isRunning = true
         startTimestamp = System.currentTimeMillis() - pausedElapsed
 
@@ -130,24 +131,18 @@ class TabataViewModel : ViewModel() {
         isRunning = false
         timerJob?.cancel()
         _remainTime.value = 0L
-        _currentSet.value = 1
         _phase.value = Phase.DONE
     }
 
-    private fun startWork() {
-        _phase.value = Phase.WORK
-        currentPhaseDuration = workTime
+    private fun enterPhase(phase: Phase, duration: Long) {
+        _phase.value = phase
+        currentPhaseDuration = duration
         pausedElapsed = 0L
-        PhaseStartTimestamp = System.currentTimeMillis()
-        start()
-
-    }
-    private fun startRest() {
-        _phase.value = Phase.REST
-        currentPhaseDuration = restTime
-        pausedElapsed = 0L
-        PhaseStartTimestamp = System.currentTimeMillis()
-        start()
+        startTimestamp = System.currentTimeMillis()
+        PhaseStartTimestamp = startTimestamp
+        _remainTime.value = duration
+        isRunning = true
+        launchTimer()
     }
 
     private fun launchTimer() {
@@ -168,7 +163,12 @@ class TabataViewModel : ViewModel() {
                     when (_phase.value) {
                         Phase.WORK -> {
                             if (_currentSet.value < totalSets) {
-                                startRest()
+                                if (restTime > 0L) {
+                                    enterPhase(Phase.REST, restTime)
+                                } else {
+                                    _currentSet.value += 1
+                                    enterPhase(Phase.WORK, workTime)
+                                }
                             } else {
                                 finish()
                             }
@@ -178,7 +178,7 @@ class TabataViewModel : ViewModel() {
                             if (_currentSet.value > totalSets) {
                                 finish()
                             } else {
-                                startWork()
+                                enterPhase(Phase.WORK, workTime)
                             }
                         }
                         else -> {}
@@ -186,7 +186,7 @@ class TabataViewModel : ViewModel() {
                     break
                 }
 
-                delay(100L)
+                delay(20L)
             }
         }
     }

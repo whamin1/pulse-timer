@@ -12,7 +12,7 @@ class RoundLogAdapter(
     private val roundViewModel: RoundViewModel
 ) : RecyclerView.Adapter<RoundLogAdapter.RoundViewHolder>(){
 
-    class RoundViewHolder(View: View) : RecyclerView.ViewHolder(View) {
+    class RoundViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val roundTextView: TextView = itemView.findViewById(R.id.text_round_item)
     }
 
@@ -40,7 +40,7 @@ class RoundLogAdapter(
         holder.roundTextView.text = "라운드 ${entry.roundNumber}: $abs ($interval)"
     }
 
-    override fun getItemCount(): Int  = roundList.size
+    override fun getItemCount(): Int = roundList.size
 
     fun updateList(newList: List<RoundEntry>) {
         roundList = newList

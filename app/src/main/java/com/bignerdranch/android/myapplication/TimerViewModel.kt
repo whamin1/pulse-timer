@@ -39,10 +39,10 @@ class TimerViewModel : ViewModel() {
 
     fun startIntervalTracking() {
         intervalJob?.cancel()
-        viewModelScope.launch {
+        intervalJob = viewModelScope.launch {
             while (isRunning) {
                 val elapsed = System.currentTimeMillis() - roundStartTimeMillis
-                _intervalProgress.value = (elapsed % 60_000L).toFloat() / 60_000L
+                _intervalProgress.value = (elapsed % 30_000L).toFloat() / 30_000L
                 delay(80L)
             }
         }
@@ -75,7 +75,7 @@ class TimerViewModel : ViewModel() {
 
         if (isPaused) {
             startTimeMillis = System.currentTimeMillis() - pausedTimeMillis
-            roundStartTimeMillis = System.currentTimeMillis() - (pausedTimeMillis - 60_000L)
+            roundStartTimeMillis = System.currentTimeMillis() - (pausedTimeMillis % 30_000L)
             isPaused = false
         } else {
             startTimeMillis = System.currentTimeMillis()
@@ -108,7 +108,7 @@ class TimerViewModel : ViewModel() {
             isRunning = false
             isPaused = true
             pausedTimeMillis = _elapsedTime.value
-            roundStartTimeMillis = System.currentTimeMillis() - (pausedTimeMillis % 60_000L)
+            roundStartTimeMillis = System.currentTimeMillis() - (pausedTimeMillis % 30_000L)
         }
     }
 

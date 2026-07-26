@@ -33,9 +33,10 @@ class CountdownViewModel : ViewModel() {
                 delay(1000L)
             }
             _count.value = 0
-            delay(500L)
             _isCounting.value = false
             onFinish()
+            delay(400L)
+            _count.value = -1
         }
     }
 

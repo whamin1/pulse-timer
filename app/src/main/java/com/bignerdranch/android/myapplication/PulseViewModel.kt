@@ -68,7 +68,7 @@ class PulseViewModel : ViewModel() {
     /** 인터벌 초침 트래킹 */
     fun startIntervalTracking() {
         intervalJob?.cancel()
-        viewModelScope.launch {
+        intervalJob = viewModelScope.launch {
             while (isRunning) {
                 val elapsed = System.currentTimeMillis() - roundStartTimeMillis
                 _intervalProgress.value = (elapsed % 30_000L).toFloat() / 30_000L

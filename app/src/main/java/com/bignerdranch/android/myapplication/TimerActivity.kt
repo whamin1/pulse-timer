@@ -39,6 +39,7 @@ class TimerActivity : AppCompatActivity() {
 
     private lateinit var timerText: TextView
     private lateinit var statusText: TextView
+    private lateinit var countdownText: TextView
     private lateinit var btnStart: Button
     private lateinit var btnPause: Button
     private lateinit var btnFinish: Button
@@ -47,7 +48,7 @@ class TimerActivity : AppCompatActivity() {
     private lateinit var btnAddRound: FloatingActionButton
     private lateinit var addRoundtText: TextView
     private lateinit var roundCountText: TextView
-    private lateinit var roundLogText: TextView
+    private lateinit var roundLogPanel: View
     private lateinit var roundLogAdapter: RoundLogAdapter
     private lateinit var roundLogRecycler: RecyclerView
 
@@ -98,6 +99,7 @@ class TimerActivity : AppCompatActivity() {
         }
         timerText = findViewById(R.id.timer_text)
         statusText = findViewById(R.id.status_text)
+        countdownText = findViewById(R.id.countdown_text)
         btnStart = findViewById(R.id.btn_start)
         btnPause = findViewById(R.id.btn_pause)
         btnFinish = findViewById(R.id.btn_finish)
@@ -106,16 +108,14 @@ class TimerActivity : AppCompatActivity() {
         btnAddRound = findViewById(R.id.btn_add_round)
         addRoundtText = findViewById(R.id.btn_add_text)
         roundCountText = findViewById(R.id.text_round_count)
-        roundLogText = findViewById(R.id.text_round_log)
+        roundLogPanel = findViewById(R.id.round_log_panel)
         val clockView = findViewById<ClockTimerView>(R.id.clockTimerView)
         roundLogRecycler = findViewById(R.id.recycler_round_log)
-        roundLogAdapter = RoundLogAdapter(emptyList(), timerMode, roundViewModel)
-        roundLogRecycler.adapter = roundLogAdapter
         roundLogRecycler.layoutManager = LinearLayoutManager(this)
 
 
-        val totalDuration = 600_00L
-        val intervalDuration = 20_000L
+        val totalDuration = 30_000L
+        val intervalDuration = 30_000L
         val startTime = System.currentTimeMillis()
         val handler = Handler(Looper.getMainLooper())
         val runnable = object : Runnable {
@@ -132,7 +132,6 @@ class TimerActivity : AppCompatActivity() {
 
             }
         }
-        handler.post(runnable)
 
         when (timerMode) {
             TimerMode.TABATA -> {
@@ -162,7 +161,7 @@ class TimerActivity : AppCompatActivity() {
 
         timerText.setOnClickListener {
             if (isTimerRunning()) {
-                Toast.makeText(this, "타이머 실행 중엔 열 수 없어요.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "타이머 실행 중에는 설정할 수 없습니다.", Toast.LENGTH_SHORT).show()
             } else {
                 startActivity(Intent(this, SettingsActivity::class.java))
             }
@@ -178,7 +177,7 @@ class TimerActivity : AppCompatActivity() {
                     finish()
                 } else {
                     lastBackPressedTime = current
-                    Toast.makeText(this@TimerActivity, "한 번 더 누르면 종료합니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@TimerActivity, "한 번 더 누르면 종료됩니다.", Toast.LENGTH_SHORT).show()
                 }
             }
         })
@@ -188,7 +187,8 @@ class TimerActivity : AppCompatActivity() {
                 countdownViewModel.count.collect { count ->
                     when (count) {
                         in 1 ..3 -> {
-                            timerText.text = count.toString()
+                            countdownText.visibility = View.VISIBLE
+                            countdownText.text = count.toString()
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
                             } else {
@@ -196,7 +196,8 @@ class TimerActivity : AppCompatActivity() {
                             }
                     }
                         0 -> {
-                            timerText.text = "시작"
+                            countdownText.visibility = View.VISIBLE
+                            countdownText.text = "시작"
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
                             } else {
@@ -204,7 +205,8 @@ class TimerActivity : AppCompatActivity() {
                             }
                         }
                         else -> {
-                        timerText.text = ""
+                            countdownText.text = ""
+                            countdownText.visibility = View.GONE
                         }
                     }
                 }
@@ -225,7 +227,7 @@ class TimerActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) { 
                 roundViewModel.roundCount.collect { count ->
-                    roundCountText.text = "$count 라운드"
+                    roundCountText.text = "라운드 $count"
                 }
             }
         }
@@ -234,7 +236,9 @@ class TimerActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 roundViewModel.rounds.collectLatest { entries ->
                     roundLogAdapter.updateList(entries)
-                    roundLogRecycler.scrollToPosition(entries.size - 1)
+                    if (entries.isNotEmpty()) {
+                        roundLogRecycler.scrollToPosition(entries.lastIndex)
+                    }
                 }
             }
         }
@@ -251,6 +255,9 @@ class TimerActivity : AppCompatActivity() {
             totalSets = prefs.getInt("${timerMode.name}_sets", 8)
         }
         forTimeCapMillis = intent.getLongExtra("forTimeCap", -1L)
+        roundLogPanel.visibility = if (showsRoundLog(timerMode)) View.VISIBLE else View.GONE
+        roundLogAdapter = RoundLogAdapter(emptyList(), timerMode, roundViewModel)
+        roundLogRecycler.adapter = roundLogAdapter
 
 
         lifecycleScope.launch {
@@ -283,7 +290,7 @@ class TimerActivity : AppCompatActivity() {
                 }
             }
 
-            tabataViewModel.setStatusText(getString(R.string.status_ready1))
+            tabataViewModel.setStatusText(getString(R.string.status_ready1, 1, totalSets))
 
             lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) { 
@@ -318,7 +325,7 @@ class TimerActivity : AppCompatActivity() {
                         val totalSets = tabataViewModel.getTotalSets()
 
                         val statusText = if (isPaused) {
-                            "일시정지됨"
+                            "일시 정지"
                         } else {
                             when (phase) {
                                 TabataViewModel.Phase.IDLE -> getString(R.string.status_ready1, currentSet, totalSets)
@@ -360,7 +367,7 @@ class TimerActivity : AppCompatActivity() {
                             }
                             TabataViewModel.Phase.REST -> {
                                 clockView.setProgressSmoothly(0f)
-                                timerText.setTextColor(ContextCompat.getColor(this@TimerActivity, Color.GREEN))
+                                timerText.setTextColor(Color.GREEN)
                                 getString(R.string.status_work_to_rest, currentSet, totalSets)
                             }
                             TabataViewModel.Phase.DONE -> {
@@ -542,7 +549,7 @@ class TimerActivity : AppCompatActivity() {
                             val totalProgress = elapsed.toFloat() / forTimeCapMillis
                             clockView.setProgressSmoothly(totalProgress)
                         } else {
-                            val totalProgress = (elapsed % 60_000L).toFloat() / 60_000L
+                            val totalProgress = (elapsed % 30_000L).toFloat() / 30_000L
                             clockView.setProgressSmoothly(totalProgress)
                         }
 
@@ -584,7 +591,7 @@ class TimerActivity : AppCompatActivity() {
             }
 
             roundCount++
-            roundCountText.text = "라운드: $roundCount"
+            roundCountText.text = "라운드 $roundCount"
 
             if (timerMode == TimerMode.AMRAP) {
                 clockView.showIntervalHand = true
@@ -701,7 +708,6 @@ class TimerActivity : AppCompatActivity() {
                     if (elapsed == 0L) {
                         startWithCount  {
                             pulseViewModel.resetRoundTimer()
-                            pulseViewModel.startIntervalTracking()
                             viewModel.setButtonState(
                                 start = false,
                                 pause = true,
@@ -723,7 +729,6 @@ class TimerActivity : AppCompatActivity() {
                             reset = false,
                             addRound = true
                         )
-                        pulseViewModel.startNewRound(onPulse = { vibrate(400)}, fromPausedState = true)
                     }
 
                 }
@@ -847,7 +852,7 @@ class TimerActivity : AppCompatActivity() {
                 countdownJob?.cancel()
                 countdownViewModel.cancel()
                 isCountingDown = false
-                timerText.text = "일시정지"
+                timerText.text = "일시 정지"
                 viewModel.setButtonState(
                     start = true,
                     pause = false,
@@ -874,7 +879,7 @@ class TimerActivity : AppCompatActivity() {
                 val elapsed = workTime - amrapViewModel.remainingTime.value
                 if (roundViewModel.lastTime - elapsed > 1000L) {
                     roundCount += 1
-                    roundCountText.text = "라운드: $roundCount"
+                    roundCountText.text = "라운드 $roundCount"
                     roundViewModel.addRound(elapsed, TimerMode.AMRAP, workTime)
                 }
                 amrapViewModel.pause()
@@ -884,7 +889,7 @@ class TimerActivity : AppCompatActivity() {
                 TimerMode.FOR_TIME -> {
                     val elapsed = viewModel.elapsedTime.value
                     roundCount += 1
-                    roundCountText.text = "라운드: $roundCount"
+                    roundCountText.text = "라운드 $roundCount"
                     if (elapsed - roundViewModel.lastTime > 1000L) {
                         roundViewModel.addRound(
                             currentRemainingTime = elapsed,
@@ -899,7 +904,7 @@ class TimerActivity : AppCompatActivity() {
                     val elapsed = pulseViewModel.elapsedTime.value
                     if (elapsed > 1000L) {
                         roundCount += 1
-                        roundCountText.text = "라운드: $roundCount"
+                        roundCountText.text = "라운드 $roundCount"
                         roundViewModel.addRound(
                             currentRemainingTime = elapsed,
                             timerMode = TimerMode.PULSE,
@@ -922,7 +927,7 @@ class TimerActivity : AppCompatActivity() {
         btnReset.setOnClickListener {
             when (timerMode) {
                 TimerMode.TABATA -> {
-                    statusText.text = getString(R.string.status_ready1)
+                    statusText.text = getString(R.string.status_ready1, 1, totalSets)
                     tabataViewModel.reset()
                     tabataViewModel.configure(workTime, restTime, totalSets)
                 }
@@ -933,7 +938,7 @@ class TimerActivity : AppCompatActivity() {
                 TimerMode.AMRAP -> {
                     statusText.text = "준비 완료"
                     roundCount = 0
-                    roundCountText.text = "라운드: $roundCount"
+                    roundCountText.text = "라운드 $roundCount"
                     clockView.showIntervalHand = false
                     amrapViewModel.reset()
                     amrapViewModel.configure(workTime)
@@ -941,7 +946,7 @@ class TimerActivity : AppCompatActivity() {
                 TimerMode.FOR_TIME -> {
                     statusText.text = "준비 완료"
                     roundCount = 0
-                    roundCountText.text = "라운드: $roundCount"
+                    roundCountText.text = "라운드 $roundCount"
                     viewModel.reset()
                     viewModel.startIntervalTracking()
                     viewModel.resetRoundTimer()
@@ -949,7 +954,7 @@ class TimerActivity : AppCompatActivity() {
                 TimerMode.PULSE -> {
                     statusText.text = "준비 완료"
                     roundCount = 0
-                    roundCountText.text = "라운드: $roundCount"
+                    roundCountText.text = "라운드 $roundCount"
                     pulseViewModel.reset()
                 }
             }
@@ -1017,6 +1022,10 @@ class TimerActivity : AppCompatActivity() {
         isCountingDown = true
         countdownViewModel.startCountdown{
             isCountingDown = false
+            countdownText.postDelayed({
+                countdownText.text = ""
+                countdownText.visibility = View.GONE
+            }, 400L)
             onFinish()
         }
     }
@@ -1180,11 +1189,11 @@ class TimerActivity : AppCompatActivity() {
 
 
         messageText.text = when (timerMode) {
-            TimerMode.AMRAP -> "운동을 완료 \n ${roundList.size}"
-            TimerMode.FOR_TIME -> "운동을 완료 \n $formatted"
-            TimerMode.TABATA -> "운동을 완료\n총 세트: ${roundList.size}"
-            TimerMode.EMOM -> "운동을 완료\n총 세트: ${roundList.size}"
-            else -> "운동을 완료함"
+            TimerMode.AMRAP -> "운동 완료\n${roundList.size}"
+            TimerMode.FOR_TIME -> "운동 완료\n$formatted"
+            TimerMode.TABATA -> "운동 완료\n총 세트: ${roundList.size}"
+            TimerMode.EMOM -> "운동 완료\n총 세트: ${roundList.size}"
+            else -> "운동 완료"
         }
 
         val recordEntity = WorkoutRecordEntity(
@@ -1260,5 +1269,9 @@ class TimerActivity : AppCompatActivity() {
             TimerMode.FOR_TIME -> viewModel.isRunning()
             TimerMode.PULSE -> pulseViewModel.isRunning()
         }
+    }
+
+    private fun showsRoundLog(mode: TimerMode): Boolean {
+        return mode == TimerMode.AMRAP || mode == TimerMode.FOR_TIME || mode == TimerMode.PULSE
     }
 }

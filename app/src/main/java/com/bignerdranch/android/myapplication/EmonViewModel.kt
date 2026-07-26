@@ -107,7 +107,7 @@ class EmomViewModel : ViewModel() {
                 _roundRemainingTime.value = remaining
                 _statusText.value = "운동 중 - 라운드 ${_currentRound.value} / $totalRounds"
 
-                delay(100L)
+                delay(20L)
             }
         }
     }

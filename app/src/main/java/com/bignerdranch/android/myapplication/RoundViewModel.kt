@@ -54,6 +54,8 @@ class RoundViewModel : ViewModel() {
             else -> 0L
         }
 
+        android.util.Log.d("RoundDebug", "▶ round=${_rounds.value.size + 1}, absolute=$absolute, interval=$interval")
+
 
         val roundNumber = _rounds.value.size + 1
         val entry = RoundEntry(roundNumber, absolute, interval)
@@ -61,7 +63,7 @@ class RoundViewModel : ViewModel() {
         _rounds.value = _rounds.value + entry
 
         _roundLogs.value = _rounds.value.map {
-            val abs = formatMillis(it.absoluteTime)
+            val abs = formatMillisWithSign(it.absoluteTime)
             val int = formatMillisWithSign(it.intervalTime)
             "라운드 ${it.roundNumber} $abs ($int)"
         }

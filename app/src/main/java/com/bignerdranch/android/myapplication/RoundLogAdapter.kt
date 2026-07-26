@@ -31,7 +31,13 @@ class RoundLogAdapter(
             roundViewModel.formatMillis(entry.absoluteTime)
         }
 
-        holder.roundTextView.text = "라운드 ${entry.roundNumber}: $abs"
+        val interval = if (timerMode == TimerMode.FOR_TIME || timerMode == TimerMode.PULSE) {
+            roundViewModel.formatMillisWithSign(entry.intervalTime)
+        } else {
+            roundViewModel.formatMillisWithSign(entry.intervalTime)
+        }
+
+        holder.roundTextView.text = "라운드 ${entry.roundNumber}: $abs ($interval)"
     }
 
     override fun getItemCount(): Int  = roundList.size

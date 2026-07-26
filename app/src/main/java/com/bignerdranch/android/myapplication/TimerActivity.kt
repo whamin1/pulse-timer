@@ -600,6 +600,7 @@ class TimerActivity : AppCompatActivity() {
             if (timerMode == TimerMode.PULSE) {
                 pulseViewModel.startIntervalTracking()
                 pulseViewModel.resetRoundTimer()
+                roundViewModel.setStartTime(System.currentTimeMillis())
                 pulseViewModel.startNewRound(onPulse = { vibrate(400) }, fromPausedState = false)
                 viewModel.setButtonState(
                     start = false,
